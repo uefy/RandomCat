@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Moon, Sun, Info, Heart } from "lucide-react"
+import { Moon, Sun, Info, Heart, Instagram, Twitter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { useTheme } from "next-themes"
@@ -714,6 +714,37 @@ export default function Home() {
   // Calculate progress as percentage of unique photos viewed
   const progressPercentage = (viewedPhotos.size / catImages.length) * 100
 
+  const socialLinks = [
+    {
+      name: "Instagram",
+      url: "https://www.instagram.com/tarikedy",
+      icon: Instagram,
+    },
+    {
+      name: "TikTok",
+      url: "https://www.tiktok.com/@uefy888",
+      icon: () => (
+        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+        </svg>
+      ),
+    },
+    {
+      name: "Twitter/X",
+      url: "https://x.com/uefy0",
+      icon: Twitter,
+    },
+    {
+      name: "Steam",
+      url: "https://steamcommunity.com/id/uefy/",
+      icon: () => (
+        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+          <path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.62 20.51 6.363 24 11.979 24c6.624 0 11.979-5.354 11.979-11.979C23.958 5.354 18.603.001 11.979.001zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.454 1.012H7.54z" />
+        </svg>
+      ),
+    },
+  ]
+
   return (
     <main
       className={`flex min-h-screen flex-col items-center justify-center p-4 transition-colors duration-300 ${
@@ -780,6 +811,25 @@ export default function Home() {
         <Button variant="ghost" size="icon" aria-label="Information" onClick={() => setInfoVisible(!infoVisible)}>
           <Info className="h-5 w-5" />
         </Button>
+      </div>
+
+      <div className="fixed top-4 left-4 flex items-center gap-2 z-10">
+        {socialLinks.map((social) => {
+          const IconComponent = social.icon
+          return (
+            <Button
+              key={social.name}
+              variant="ghost"
+              size="icon"
+              asChild
+              className="hover:bg-secondary/80 transition-colors"
+            >
+              <a href={social.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${social.name}`}>
+                <IconComponent />
+              </a>
+            </Button>
+          )
+        })}
       </div>
 
       {infoVisible && (
