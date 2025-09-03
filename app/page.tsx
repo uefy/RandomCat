@@ -839,156 +839,160 @@ export default function Home() {
   ]
 
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-center p-4 transition-colors duration-300 ${
-        currentTheme === "dark" ? "bg-black text-white" : "bg-white text-black"
-      }`}
-    >
-      <div className="w-full mb-8 flex justify-center">
-        <a
-          href="https://wallhack.com/en-int"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block w-full max-w-4xl"
-        >
-          <Image
-            src="/wallhack-banner.jpg"
-            alt="WALLHACK"
-            width={1200}
-            height={300}
-            className="w-full h-auto rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
-            priority
-          />
-        </a>
-      </div>
-
-      <div className="fixed top-4 right-4 flex items-center gap-4 z-10">
-        <Dialog open={donateOpen} onOpenChange={setDonateOpen}>
-          <DialogTrigger asChild>
-            <Button
-              variant={currentTheme === "dark" ? "outline" : "default"}
-              size="sm"
-              className={`flex items-center gap-1 ${currentTheme === "light" ? "bg-white text-black hover:bg-gray-100" : ""}`}
-            >
-              <Heart className={`h-4 w-4 ${currentTheme === "light" ? "text-black" : ""}`} />
-              <span className={`hidden sm:inline ${currentTheme === "light" ? "text-black" : ""}`}>Donate</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-xl font-light tracking-tight">Support This Project</DialogTitle>
-              <DialogDescription className="text-base font-light mt-2">
-                New photos every monday. If you would like to support me, you can make a donation.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-6 mt-4">
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium tracking-wide uppercase text-muted-foreground">Bitcoin</h3>
-                <div
-                  className="p-3 bg-muted rounded-md cursor-pointer hover:bg-muted/80 transition-colors"
-                  onClick={() => copyToClipboard(cryptoAddresses.bitcoin, "Bitcoin")}
-                >
-                  <p className="font-mono text-sm">{cryptoAddresses.bitcoin}</p>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium tracking-wide uppercase text-muted-foreground">Ethereum</h3>
-                <div
-                  className="p-3 bg-muted rounded-md cursor-pointer hover:bg-muted/80 transition-colors"
-                  onClick={() => copyToClipboard(cryptoAddresses.ethereum, "Ethereum")}
-                >
-                  <p className="font-mono text-sm">{cryptoAddresses.ethereum}</p>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium tracking-wide uppercase text-muted-foreground">Litecoin</h3>
-                <div
-                  className="p-3 bg-muted rounded-md cursor-pointer hover:bg-muted/80 transition-colors"
-                  onClick={() => copyToClipboard(cryptoAddresses.litecoin, "Litecoin")}
-                >
-                  <p className="font-mono text-sm">{cryptoAddresses.litecoin}</p>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
-          {currentTheme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-        </Button>
-
-        <Button variant="ghost" size="icon" aria-label="Information" onClick={() => setInfoVisible(!infoVisible)}>
-          <Info className="h-5 w-5" />
-        </Button>
-      </div>
-
-      <div className="fixed top-4 left-4 flex items-center gap-2 z-10">
-        {socialLinks.map((social) => {
-          const IconComponent = social.icon
-          return (
-            <Button
-              key={social.name}
-              variant="ghost"
-              size="icon"
-              asChild
-              className="hover:bg-secondary/80 transition-colors"
-            >
-              <a href={social.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${social.name}`}>
-                <IconComponent />
-              </a>
-            </Button>
-          )
-        })}
-      </div>
-
-      {infoVisible && (
-        <div className="fixed top-16 right-4 bg-secondary p-4 rounded-md shadow-md max-w-xs z-10">
-          <p className="text-sm">
-            If you would like to see photos of your own cat or cats you find funny, you can reach me via Discord. My
-            username is uefyy
-          </p>
-        </div>
-      )}
-
-      <div className="w-full max-w-3xl flex flex-col items-center gap-6">
-        <div className="relative w-full max-h-[70vh] aspect-auto rounded-lg overflow-hidden">
-          <div className="relative w-full h-full flex items-center justify-center">
+    <div className="min-h-screen">
+      <div className="w-full bg-background border-b">
+        <div className="container mx-auto px-4 py-4">
+          <a
+            href="https://wallhack.com/en-int"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full max-w-4xl mx-auto"
+          >
             <Image
-              src={catImages[currentIndex] || "/placeholder.svg"}
-              alt="Random cat photo"
-              className={`max-w-full max-h-[70vh] w-auto h-auto object-contain transition-opacity duration-300 ${
-                isLoading ? "opacity-0" : "opacity-100"
-              }`}
-              onLoad={() => setIsLoading(false)}
-              width={800}
-              height={800}
+              src="/wallhack-banner.jpg"
+              alt="WALLHACK"
+              width={1200}
+              height={300}
+              className="w-full h-auto rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
               priority
             />
-            {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="w-full flex flex-col gap-2">
-          <div className="flex justify-between items-center text-sm text-muted-foreground">
-            <span>
-              Viewed {viewedPhotos.size} of {catImages.length} photos ({Math.round(progressPercentage)}%)
-            </span>
-          </div>
-          <Progress value={progressPercentage} className="h-1" />
-        </div>
-
-        <div className="fixed bottom-8">
-          <Button onClick={getRandomImage} className="px-8 py-6 text-lg">
-            Show Another Cat
-          </Button>
+          </a>
         </div>
       </div>
-    </main>
+
+      <main
+        className={`flex min-h-screen flex-col items-center justify-center p-4 transition-colors duration-300 ${
+          currentTheme === "dark" ? "bg-black text-white" : "bg-white text-black"
+        }`}
+      >
+        <div className="fixed top-4 right-4 flex items-center gap-4 z-10">
+          <Dialog open={donateOpen} onOpenChange={setDonateOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant={currentTheme === "dark" ? "outline" : "default"}
+                size="sm"
+                className={`flex items-center gap-1 ${currentTheme === "light" ? "bg-white text-black hover:bg-gray-100" : ""}`}
+              >
+                <Heart className={`h-4 w-4 ${currentTheme === "light" ? "text-black" : ""}`} />
+                <span className={`hidden sm:inline ${currentTheme === "light" ? "text-black" : ""}`}>Donate</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-light tracking-tight">Support This Project</DialogTitle>
+                <DialogDescription className="text-base font-light mt-2">
+                  New photos every monday. If you would like to support me, you can make a donation.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-6 mt-4">
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium tracking-wide uppercase text-muted-foreground">Bitcoin</h3>
+                  <div
+                    className="p-3 bg-muted rounded-md cursor-pointer hover:bg-muted/80 transition-colors"
+                    onClick={() => copyToClipboard(cryptoAddresses.bitcoin, "Bitcoin")}
+                  >
+                    <p className="font-mono text-sm">{cryptoAddresses.bitcoin}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium tracking-wide uppercase text-muted-foreground">Ethereum</h3>
+                  <div
+                    className="p-3 bg-muted rounded-md cursor-pointer hover:bg-muted/80 transition-colors"
+                    onClick={() => copyToClipboard(cryptoAddresses.ethereum, "Ethereum")}
+                  >
+                    <p className="font-mono text-sm">{cryptoAddresses.ethereum}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium tracking-wide uppercase text-muted-foreground">Litecoin</h3>
+                  <div
+                    className="p-3 bg-muted rounded-md cursor-pointer hover:bg-muted/80 transition-colors"
+                    onClick={() => copyToClipboard(cryptoAddresses.litecoin, "Litecoin")}
+                  >
+                    <p className="font-mono text-sm">{cryptoAddresses.litecoin}</p>
+                  </div>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
+            {currentTheme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
+
+          <Button variant="ghost" size="icon" aria-label="Information" onClick={() => setInfoVisible(!infoVisible)}>
+            <Info className="h-5 w-5" />
+          </Button>
+        </div>
+
+        <div className="fixed top-4 left-4 flex items-center gap-2 z-10">
+          {socialLinks.map((social) => {
+            const IconComponent = social.icon
+            return (
+              <Button
+                key={social.name}
+                variant="ghost"
+                size="icon"
+                asChild
+                className="hover:bg-secondary/80 transition-colors"
+              >
+                <a href={social.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${social.name}`}>
+                  <IconComponent />
+                </a>
+              </Button>
+            )
+          })}
+        </div>
+
+        {infoVisible && (
+          <div className="fixed top-16 right-4 bg-secondary p-4 rounded-md shadow-md max-w-xs z-10">
+            <p className="text-sm">
+              If you would like to see photos of your own cat or cats you find funny, you can reach me via Discord. My
+              username is uefyy
+            </p>
+          </div>
+        )}
+
+        <div className="w-full max-w-3xl flex flex-col items-center gap-6">
+          <div className="relative w-full max-h-[70vh] aspect-auto rounded-lg overflow-hidden">
+            <div className="relative w-full h-full flex items-center justify-center">
+              <Image
+                src={catImages[currentIndex] || "/placeholder.svg"}
+                alt="Random cat photo"
+                className={`max-w-full max-h-[70vh] w-auto h-auto object-contain transition-opacity duration-300 ${
+                  isLoading ? "opacity-0" : "opacity-100"
+                }`}
+                onLoad={() => setIsLoading(false)}
+                width={800}
+                height={800}
+                priority
+              />
+              {isLoading && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="w-full flex flex-col gap-2">
+            <div className="flex justify-between items-center text-sm text-muted-foreground">
+              <span>
+                Viewed {viewedPhotos.size} of {catImages.length} photos ({Math.round(progressPercentage)}%)
+              </span>
+            </div>
+            <Progress value={progressPercentage} className="h-1" />
+          </div>
+
+          <div className="fixed bottom-8">
+            <Button onClick={getRandomImage} className="px-8 py-6 text-lg">
+              Show Another Cat
+            </Button>
+          </div>
+        </div>
+      </main>
+    </div>
   )
 }
