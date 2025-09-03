@@ -839,9 +839,10 @@ export default function Home() {
   ]
 
   return (
-    <div className="min-h-screen">
-      <div className="w-full bg-background border-b">
-        <div className="container mx-auto px-4 py-4">
+    <div className="h-screen flex flex-col overflow-hidden">
+      {/* Fixed WALLHACK Banner at top */}
+      <div className="flex-shrink-0 w-full bg-background border-b">
+        <div className="container mx-auto px-4 py-2">
           <a
             href="https://wallhack.com/en-int"
             target="_blank"
@@ -852,20 +853,22 @@ export default function Home() {
               src="/wallhack-banner.jpg"
               alt="WALLHACK"
               width={1200}
-              height={300}
-              className="w-full h-auto rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
+              height={200}
+              className="w-full h-auto max-h-20 object-contain rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
               priority
             />
           </a>
         </div>
       </div>
 
+      {/* Main content area - takes remaining space */}
       <main
-        className={`flex min-h-screen flex-col items-center justify-center p-4 transition-colors duration-300 ${
+        className={`flex-1 flex flex-col items-center justify-center p-4 transition-colors duration-300 relative ${
           currentTheme === "dark" ? "bg-black text-white" : "bg-white text-black"
         }`}
       >
-        <div className="fixed top-4 right-4 flex items-center gap-4 z-10">
+        {/* Top right controls */}
+        <div className="absolute top-4 right-4 flex items-center gap-4 z-10">
           <Dialog open={donateOpen} onOpenChange={setDonateOpen}>
             <DialogTrigger asChild>
               <Button
@@ -927,7 +930,8 @@ export default function Home() {
           </Button>
         </div>
 
-        <div className="fixed top-4 left-4 flex items-center gap-2 z-10">
+        {/* Social links - top left */}
+        <div className="absolute top-4 left-4 flex items-center gap-2 z-10">
           {socialLinks.map((social) => {
             const IconComponent = social.icon
             return (
@@ -946,8 +950,9 @@ export default function Home() {
           })}
         </div>
 
+        {/* Info popup */}
         {infoVisible && (
-          <div className="fixed top-16 right-4 bg-secondary p-4 rounded-md shadow-md max-w-xs z-10">
+          <div className="absolute top-16 right-4 bg-secondary p-4 rounded-md shadow-md max-w-xs z-10">
             <p className="text-sm">
               If you would like to see photos of your own cat or cats you find funny, you can reach me via Discord. My
               username is uefyy
@@ -955,13 +960,15 @@ export default function Home() {
           </div>
         )}
 
-        <div className="w-full max-w-3xl flex flex-col items-center gap-6">
-          <div className="relative w-full max-h-[70vh] aspect-auto rounded-lg overflow-hidden">
+        {/* Main content - centered */}
+        <div className="w-full max-w-4xl flex flex-col items-center gap-4 h-full justify-center">
+          {/* Cat image container */}
+          <div className="relative w-full flex-1 flex items-center justify-center max-h-[calc(100vh-200px)]">
             <div className="relative w-full h-full flex items-center justify-center">
               <Image
                 src={catImages[currentIndex] || "/placeholder.svg"}
                 alt="Random cat photo"
-                className={`max-w-full max-h-[70vh] w-auto h-auto object-contain transition-opacity duration-300 ${
+                className={`max-w-full max-h-full w-auto h-auto object-contain transition-opacity duration-300 ${
                   isLoading ? "opacity-0" : "opacity-100"
                 }`}
                 onLoad={() => setIsLoading(false)}
@@ -977,19 +984,22 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="w-full flex flex-col gap-2">
-            <div className="flex justify-between items-center text-sm text-muted-foreground">
-              <span>
-                Viewed {viewedPhotos.size} of {catImages.length} photos ({Math.round(progressPercentage)}%)
-              </span>
+          {/* Progress bar and button - bottom */}
+          <div className="w-full flex flex-col gap-4 pb-4">
+            <div className="w-full flex flex-col gap-2">
+              <div className="flex justify-between items-center text-sm text-muted-foreground">
+                <span>
+                  Viewed {viewedPhotos.size} of {catImages.length} photos ({Math.round(progressPercentage)}%)
+                </span>
+              </div>
+              <Progress value={progressPercentage} className="h-1" />
             </div>
-            <Progress value={progressPercentage} className="h-1" />
-          </div>
 
-          <div className="fixed bottom-8">
-            <Button onClick={getRandomImage} className="px-8 py-6 text-lg">
-              Show Another Cat
-            </Button>
+            <div className="flex justify-center">
+              <Button onClick={getRandomImage} className="px-8 py-6 text-lg">
+                Show Another Cat
+              </Button>
+            </div>
           </div>
         </div>
       </main>
