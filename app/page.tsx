@@ -844,6 +844,24 @@ export default function Home() {
         currentTheme === "dark" ? "bg-black text-white" : "bg-white text-black"
       }`}
     >
+      <div className="w-full mb-8 flex justify-center">
+        <a
+          href="https://wallhack.com/en-int"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-full max-w-4xl"
+        >
+          <Image
+            src="/wallhack-banner.jpg"
+            alt="WALLHACK"
+            width={1200}
+            height={300}
+            className="w-full h-auto rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
+            priority
+          />
+        </a>
+      </div>
+
       <div className="fixed top-4 right-4 flex items-center gap-4 z-10">
         <Dialog open={donateOpen} onOpenChange={setDonateOpen}>
           <DialogTrigger asChild>
