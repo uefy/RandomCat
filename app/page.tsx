@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { Moon, Sun, Info, Heart, Instagram, Twitter } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Moon, Sun, Info, Heart, Instagram, Twitter, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { useTheme } from "next-themes"
 import Image from "next/image"
 import { toast } from "@/components/ui/use-toast"
 import {
@@ -16,19 +15,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-export default function Home() {
-  const [mounted, setMounted] = useState(false)
-  const { setTheme } = useTheme()
-  const [currentTheme, setCurrentTheme] = useState("dark")
+export default function CatPhotoViewer() {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
-  const [viewedPhotos, setViewedPhotos] = useState<Set<number>>(new Set())
-  const [infoVisible, setInfoVisible] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("light")
   const [donateOpen, setDonateOpen] = useState(false)
-
-  // Ref to track if a key press is being processed
-  const isProcessingKey = useRef(false)
-  const remainingIndices = useRef<number[]>([])
+  const [infoVisible, setInfoVisible] = useState(false)
+  const [viewedPhotos, setViewedPhotos] = useState(new Set<number>())
+  const [photoHistory, setPhotoHistory] = useState<number[]>([0])
+  const [historyIndex, setHistoryIndex] = useState(0)
 
   const cryptoAddresses = {
     bitcoin: "bc1qxyqmvj9dac3wthtruyen7pg64mej6hhfuw5tx7",
@@ -733,55 +728,60 @@ export default function Home() {
     })
   }
 
-  // Initialize remaining indices
-  useEffect(() => {
-    remainingIndices.current = Array.from({ length: catImages.length }, (_, i) => i)
-  }, [catImages.length])
-
   // Function to get a new random image that hasn't been shown yet
   const getRandomImage = () => {
     setIsLoading(true)
+    let newIndex
+    do {
+      newIndex = Math.floor(Math.random() * catImages.length)
+    } while (newIndex === currentIndex && catImages.length > 1)
 
-    // If we've shown all images, reset the remaining indices
-    if (remainingIndices.current.length === 0) {
-      remainingIndices.current = Array.from({ length: catImages.length }, (_, i) => i)
-      setViewedPhotos(new Set())
-    }
-
-    // Get a random index from the remaining indices
-    const randomPosition = Math.floor(Math.random() * remainingIndices.current.length)
-    const newIndex = remainingIndices.current[randomPosition]
-
-    // Remove the selected index from remaining indices
-    remainingIndices.current.splice(randomPosition, 1)
-
-    // Update state
     setCurrentIndex(newIndex)
-    setViewedPhotos((prev) => new Set(prev).add(newIndex))
+    setViewedPhotos((prev) => new Set([...prev, newIndex]))
+
+    // Add to history and update history index
+    const newHistory = photoHistory.slice(0, historyIndex + 1)
+    newHistory.push(newIndex)
+    setPhotoHistory(newHistory)
+    setHistoryIndex(newHistory.length - 1)
+  }
+
+  // Function to go back to the previous photo
+  const goBack = () => {
+    if (historyIndex > 0) {
+      setIsLoading(true)
+      const newHistoryIndex = historyIndex - 1
+      const previousIndex = photoHistory[newHistoryIndex]
+      setCurrentIndex(previousIndex)
+      setHistoryIndex(newHistoryIndex)
+    }
+  }
+
+  // Function to go forward to the next photo
+  const goForward = () => {
+    if (historyIndex < photoHistory.length - 1) {
+      setIsLoading(true)
+      const newHistoryIndex = historyIndex + 1
+      const nextIndex = photoHistory[newHistoryIndex]
+      setCurrentIndex(nextIndex)
+      setHistoryIndex(newHistoryIndex)
+    } else {
+      getRandomImage()
+    }
   }
 
   // Toggle theme function
   const toggleTheme = () => {
     const newTheme = currentTheme === "dark" ? "light" : "dark"
     setCurrentTheme(newTheme)
-    setTheme(newTheme)
   }
 
   // Completely rewritten Enter key handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Only process Enter key and only if we're not already processing a key press
-      if (e.key === "Enter" && !isProcessingKey.current) {
-        // Set the flag to prevent multiple rapid keypresses
-        isProcessingKey.current = true
-
-        // Change the image
+      if (e.key === "Enter") {
         getRandomImage()
-
-        // Reset the flag after a delay to prevent multiple triggers
-        setTimeout(() => {
-          isProcessingKey.current = false
-        }, 500) // Longer delay to ensure the image has time to load
       }
     }
 
@@ -794,15 +794,10 @@ export default function Home() {
     }
   }, []) // Empty dependency array means this only runs once on mount
 
-  // Initialize with a random image on first load and set dark theme
+  // Initialize with a random image on first load and set light theme
   useEffect(() => {
-    setMounted(true)
-    setTheme("dark")
-    setCurrentTheme("dark")
     getRandomImage()
   }, [])
-
-  if (!mounted) return null
 
   // Calculate progress as percentage of unique photos viewed
   const progressPercentage = (viewedPhotos.size / catImages.length) * 100
@@ -840,130 +835,148 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      {/* Fixed WALLHACK Banner at top */}
       <div className="flex-shrink-0 w-full bg-background border-b">
         <div className="container mx-auto px-4 py-2">
-          <a
-            href="https://wallhack.com/en-int"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block w-full max-w-4xl mx-auto"
-          >
-            <Image
-              src="/wallhack-banner.jpg"
-              alt="WALLHACK"
-              width={1200}
-              height={200}
-              className="w-full h-auto max-h-20 object-contain rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
-              priority
-            />
-          </a>
+          <div className="flex items-center justify-between">
+            {/* WALLHACK Banner - centered */}
+            <div className="flex-1 flex justify-center">
+              <a
+                href="https://wallhack.com/en-int"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full max-w-2xl"
+              >
+                <Image
+                  src="/wallhack-banner.jpg"
+                  alt="WALLHACK"
+                  width={800}
+                  height={120}
+                  className="w-full h-auto max-h-16 object-contain rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
+                  priority
+                />
+              </a>
+            </div>
+
+            {/* Controls - right side */}
+            <div className="flex items-center gap-2 ml-4">
+              {/* Social links */}
+              {socialLinks.map((social) => {
+                const IconComponent = social.icon
+                return (
+                  <Button
+                    key={social.name}
+                    variant="ghost"
+                    size="icon"
+                    asChild
+                    className="hover:bg-secondary/80 transition-colors h-8 w-8"
+                  >
+                    <a href={social.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${social.name}`}>
+                      <IconComponent className="h-4 w-4" />
+                    </a>
+                  </Button>
+                )
+              })}
+
+              {/* Donate button */}
+              <Dialog open={donateOpen} onOpenChange={setDonateOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Heart className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-light tracking-tight">Support This Project</DialogTitle>
+                    <DialogDescription className="text-base font-light mt-2">
+                      New photos every monday. If you would like to support me, you can make a donation.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-6 mt-4">
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium tracking-wide uppercase text-muted-foreground">Bitcoin</h3>
+                      <div
+                        className="p-3 bg-muted rounded-md cursor-pointer hover:bg-muted/80 transition-colors"
+                        onClick={() => copyToClipboard(cryptoAddresses.bitcoin, "Bitcoin")}
+                      >
+                        <p className="font-mono text-sm">{cryptoAddresses.bitcoin}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium tracking-wide uppercase text-muted-foreground">Ethereum</h3>
+                      <div
+                        className="p-3 bg-muted rounded-md cursor-pointer hover:bg-muted/80 transition-colors"
+                        onClick={() => copyToClipboard(cryptoAddresses.ethereum, "Ethereum")}
+                      >
+                        <p className="font-mono text-sm">{cryptoAddresses.ethereum}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium tracking-wide uppercase text-muted-foreground">Litecoin</h3>
+                      <div
+                        className="p-3 bg-muted rounded-md cursor-pointer hover:bg-muted/80 transition-colors"
+                        onClick={() => copyToClipboard(cryptoAddresses.litecoin, "Litecoin")}
+                      >
+                        <p className="font-mono text-sm">{cryptoAddresses.litecoin}</p>
+                      </div>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              {/* Theme toggle */}
+              <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme" className="h-8 w-8">
+                {currentTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </Button>
+
+              {/* Info button */}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Information"
+                  onClick={() => setInfoVisible(!infoVisible)}
+                  className="h-8 w-8"
+                >
+                  <Info className="h-4 w-4" />
+                </Button>
+                {/* Info popup */}
+                {infoVisible && (
+                  <div className="absolute top-10 right-0 bg-secondary p-4 rounded-md shadow-md max-w-xs z-10">
+                    <p className="text-sm">
+                      If you would like to see photos of your own cat or cats you find funny, you can reach me via
+                      Discord. My username is uefyy
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Main content area - takes remaining space */}
+      {/* Main content area */}
       <main
         className={`flex-1 flex flex-col items-center justify-center p-4 transition-colors duration-300 relative ${
           currentTheme === "dark" ? "bg-black text-white" : "bg-white text-black"
         }`}
       >
-        {/* Top right controls */}
-        <div className="absolute top-4 right-4 flex items-center gap-4 z-10">
-          <Dialog open={donateOpen} onOpenChange={setDonateOpen}>
-            <DialogTrigger asChild>
-              <Button
-                variant={currentTheme === "dark" ? "outline" : "default"}
-                size="sm"
-                className={`flex items-center gap-1 ${currentTheme === "light" ? "bg-white text-black hover:bg-gray-100" : ""}`}
-              >
-                <Heart className={`h-4 w-4 ${currentTheme === "light" ? "text-black" : ""}`} />
-                <span className={`hidden sm:inline ${currentTheme === "light" ? "text-black" : ""}`}>Donate</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle className="text-xl font-light tracking-tight">Support This Project</DialogTitle>
-                <DialogDescription className="text-base font-light mt-2">
-                  New photos every monday. If you would like to support me, you can make a donation.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-6 mt-4">
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium tracking-wide uppercase text-muted-foreground">Bitcoin</h3>
-                  <div
-                    className="p-3 bg-muted rounded-md cursor-pointer hover:bg-muted/80 transition-colors"
-                    onClick={() => copyToClipboard(cryptoAddresses.bitcoin, "Bitcoin")}
-                  >
-                    <p className="font-mono text-sm">{cryptoAddresses.bitcoin}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium tracking-wide uppercase text-muted-foreground">Ethereum</h3>
-                  <div
-                    className="p-3 bg-muted rounded-md cursor-pointer hover:bg-muted/80 transition-colors"
-                    onClick={() => copyToClipboard(cryptoAddresses.ethereum, "Ethereum")}
-                  >
-                    <p className="font-mono text-sm">{cryptoAddresses.ethereum}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium tracking-wide uppercase text-muted-foreground">Litecoin</h3>
-                  <div
-                    className="p-3 bg-muted rounded-md cursor-pointer hover:bg-muted/80 transition-colors"
-                    onClick={() => copyToClipboard(cryptoAddresses.litecoin, "Litecoin")}
-                  >
-                    <p className="font-mono text-sm">{cryptoAddresses.litecoin}</p>
-                  </div>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-
-          <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
-            {currentTheme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        <div className="w-full max-w-4xl flex items-center gap-4 h-full justify-center">
+          {/* Left navigation button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={goBack}
+            disabled={historyIndex === 0}
+            className="h-12 w-12 rounded-full bg-background/80 hover:bg-background shadow-lg disabled:opacity-30"
+            aria-label="Previous photo"
+          >
+            <ChevronLeft className="h-6 w-6" />
           </Button>
 
-          <Button variant="ghost" size="icon" aria-label="Information" onClick={() => setInfoVisible(!infoVisible)}>
-            <Info className="h-5 w-5" />
-          </Button>
-        </div>
-
-        {/* Social links - top left */}
-        <div className="absolute top-4 left-4 flex items-center gap-2 z-10">
-          {socialLinks.map((social) => {
-            const IconComponent = social.icon
-            return (
-              <Button
-                key={social.name}
-                variant="ghost"
-                size="icon"
-                asChild
-                className="hover:bg-secondary/80 transition-colors"
-              >
-                <a href={social.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${social.name}`}>
-                  <IconComponent />
-                </a>
-              </Button>
-            )
-          })}
-        </div>
-
-        {/* Info popup */}
-        {infoVisible && (
-          <div className="absolute top-16 right-4 bg-secondary p-4 rounded-md shadow-md max-w-xs z-10">
-            <p className="text-sm">
-              If you would like to see photos of your own cat or cats you find funny, you can reach me via Discord. My
-              username is uefyy
-            </p>
-          </div>
-        )}
-
-        {/* Main content - centered */}
-        <div className="w-full max-w-4xl flex flex-col items-center gap-4 h-full justify-center">
           {/* Cat image container */}
-          <div className="relative w-full flex-1 flex items-center justify-center max-h-[calc(100vh-200px)]">
+          <div className="relative flex-1 flex items-center justify-center max-h-[calc(100vh-200px)]">
             <div className="relative w-full h-full flex items-center justify-center">
               <Image
                 src={catImages[currentIndex] || "/placeholder.svg"}
@@ -984,22 +997,26 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Progress bar and button - bottom */}
-          <div className="w-full flex flex-col gap-4 pb-4">
-            <div className="w-full flex flex-col gap-2">
-              <div className="flex justify-between items-center text-sm text-muted-foreground">
-                <span>
-                  Viewed {viewedPhotos.size} of {catImages.length} photos ({Math.round(progressPercentage)}%)
-                </span>
-              </div>
-              <Progress value={progressPercentage} className="h-1" />
-            </div>
+          {/* Right navigation button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={goForward}
+            className="h-12 w-12 rounded-full bg-background/80 hover:bg-background shadow-lg"
+            aria-label="Next photo"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </Button>
+        </div>
 
-            <div className="flex justify-center">
-              <Button onClick={getRandomImage} className="px-8 py-6 text-lg">
-                Show Another Cat
-              </Button>
+        <div className="w-full max-w-4xl pb-4">
+          <div className="w-full flex flex-col gap-2">
+            <div className="flex justify-between items-center text-sm text-muted-foreground">
+              <span>
+                Viewed {viewedPhotos.size} of {catImages.length} photos ({Math.round(progressPercentage)}%)
+              </span>
             </div>
+            <Progress value={progressPercentage} className="h-1" />
           </div>
         </div>
       </main>
